@@ -6,6 +6,8 @@
   <title>GACIP - Liderazgo Transformacional</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- LIBRERÍAS NECESARIAS (¡Aquí faltaba Supabase!) -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,13 +16,16 @@
 </head>
 <body>
 
-  <!-- LOGIN -->
+  <!-- 1. PANTALLA DE LOGIN -->
   <div id="login-view" style="display: flex;">
     <div class="glass-card login-card">
       <div class="logo-gacip">🛡️ GACIP</div>
       <h2>Portal de Entrenamiento</h2>
+      
       <div id="login-error" class="alert" style="display: none;">Credenciales incorrectas</div>
-      <form id="login-form">
+      
+      <!-- Se previene que recargue la página por defecto -->
+      <form id="login-form" onsubmit="event.preventDefault();">
         <div class="input-group">
           <label>ID / Número de Usuario</label>
           <input type="text" id="login-id" placeholder="Ej. 1, 2, admin1 o sudo" autocomplete="off">
@@ -34,7 +39,7 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- 2. DASHBOARD -->
   <div id="dashboard-view" style="display: none;">
     <nav class="sidebar">
       <div class="user-profile">
@@ -50,14 +55,14 @@
     <main class="content" id="main-content"></main>
   </div>
 
-  <!-- MODAL DE EDICIÓN -->
+  <!-- 3. MODAL DE EDICIÓN PARA SUDO -->
   <div id="edit-modal" class="modal" style="display: none;">
     <div class="glass-card modal-content">
       <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Editar Perfil</h3>
       <input type="hidden" id="edit-id">
       
       <div class="input-group">
-        <label>Nombre del Voluntario / Admin</label>
+        <label>Nombre del Cadete / Usuario</label>
         <input type="text" id="edit-name">
       </div>
       <div class="input-group">
@@ -67,7 +72,7 @@
       <div class="input-group">
         <label>Rol de acceso</label>
         <select id="edit-role">
-          <option value="user">Voluntario (Usuario)</option>
+          <option value="user">Voluntario</option>
           <option value="admin">Admin</option>
         </select>
       </div>
@@ -80,6 +85,7 @@
   </div>
 
   <div id="toast">Notificación</div>
+
   <script src="app.js"></script>
 </body>
 </html>
