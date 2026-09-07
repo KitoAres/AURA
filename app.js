@@ -1,6 +1,6 @@
 // --- 1. CONFIGURACIÓN DE SUPABASE ---
 const SUPABASE_URL = 'https://cmlyjfxuybkglkafhyus.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtbHlqZnh1eWJrZ2xrYWZoeXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NDM2NjUsImV4cCI6MjEwNDMxOTY2NX0.o1z1TMYzJO5VRX5S0dNY2szIrxvntb5m-EyI7QIYOPY'; // <--- ¡PEGA TU LLAVE AQUÍ!
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtbHlqZnh1eWJrZ2xrYWZoeXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NDM2NjUsImV4cCI6MjEwNDMxOTY2NX0.o1z1TMYzJO5VRX5S0dNY2szIrxvntb5m-EyI7QIYOPY';
 
 // Inicializar la conexión
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -8,6 +8,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let html5QrcodeScanner = null;
 let radarChart = null;
+let editingUserId = null; // Variable para saber a quién estamos editando
 
 // --- 2. SISTEMA DE LOGIN (NUBE) ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -103,6 +104,7 @@ async function loadView(view) {
         <td data-label="Rol">${u.role}</td>
         <td data-label="Acciones">
           <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+            <button onclick="openEditModal('${u.id}', '${u.name}', '${u.pass}', '${u.role}')" class="btn-outline" style="border-color:var(--gold); color:var(--gold)">Editar</button>
             <button onclick="deleteUser('${u.id}')" class="btn-outline">Borrar</button>
           </div>
         </td>
@@ -180,7 +182,7 @@ async function loadView(view) {
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div class="glass-card" style="text-align:center;">
           <h1 style="font-size:4.5rem; color:var(--gold); margin:0;">${currentUser.stars} ⭐</h1>
-          <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias confirmadas: ${count}</p>
+          <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias confirmadas: ${count || 0}</p>
           <div class="chart-container"><canvas id="radarChart"></canvas></div>
           <hr style="border-color:var(--border); margin: 1.5rem 0;">
           <h3 style="color:var(--primary)">Comentarios del Instructor</h3>
@@ -202,7 +204,7 @@ async function loadView(view) {
   }
 }
 
-// --- 5. LÓGICAS SUDO (BASE DE DATOS) ---
+// --- 5. LÓGICAS SUDO (BASE DE DATOS Y EDICIÓN) ---
 async function addUser() {
   const id = document.getElementById('new-id').value.trim();
   const name = document.getElementById('new-name').value.trim() || `Cadete ${id}`;
@@ -218,6 +220,41 @@ async function deleteUser(id) {
   if(confirm(`¿Borrar definitivamente al usuario ${id}?`)) {
     await supabase.from('usuarios').delete().eq('id', id);
     showToast("🗑️ Usuario eliminado");
+    loadView('sudo-users');
+  }
+}
+
+// Funciones para Editar Usuario
+function openEditModal(id, name, pass, role) {
+  editingUserId = id;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = name;
+  document.getElementById('edit-pass').value = pass;
+  document.getElementById('edit-role').value = role;
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+  editingUserId = null;
+}
+
+async function saveUserEdit() {
+  if (!editingUserId) return;
+  const name = document.getElementById('edit-name').value.trim();
+  const pass = document.getElementById('edit-pass').value.trim();
+  const role = document.getElementById('edit-role').value;
+
+  const { error } = await supabase
+    .from('usuarios')
+    .update({ name, pass, role })
+    .eq('id', editingUserId);
+
+  if (error) {
+    showToast("❌ Error al actualizar");
+  } else {
+    showToast("✅ Usuario modificado");
+    closeEditModal();
     loadView('sudo-users');
   }
 }
