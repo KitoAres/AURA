@@ -1,0 +1,100 @@
+:root {
+  --bg-dark: #070b19;
+  --panel-bg: rgba(16, 23, 42, 0.75);
+  --border: rgba(56, 189, 248, 0.2);
+  --primary: #38bdf8;
+  --gold: #fbbf24;
+  --danger: #ef4444;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  background-image: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(251, 191, 36, 0.05), transparent 40%);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .logo-gacip {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* Vistas */
+.view { display: none; }
+.view.active { display: flex; width: 100%; min-height: 100vh; }
+
+/* Login */
+#login-view { justify-content: center; align-items: center; padding: 2rem; }
+.glass-card {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+.login-card { width: 100%; max-width: 400px; text-align: center; }
+.logo-gacip { font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+
+/* Inputs y Botones */
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+input, select, textarea {
+  width: 100%; padding: 0.9rem; border-radius: 10px; border: 1px solid var(--border);
+  background: rgba(0,0,0,0.3); color: white; font-family: inherit; outline: none;
+}
+input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(56,189,248,0.2); }
+
+.btn-glow {
+  width: 100%; padding: 1rem; border: none; border-radius: 10px;
+  background: linear-gradient(90deg, #0284c7, #38bdf8); color: white;
+  font-weight: 600; font-size: 1rem; cursor: pointer; text-transform: uppercase;
+  transition: all 0.3s;
+}
+.btn-glow:hover { box-shadow: 0 0 20px rgba(56,189,248,0.4); transform: translateY(-2px); }
+
+.btn-outline {
+  padding: 0.7rem 1.2rem; border: 1px solid var(--danger); background: transparent;
+  color: var(--danger); border-radius: 8px; cursor: pointer; transition: 0.3s;
+}
+.btn-outline:hover { background: rgba(239,68,68,0.1); }
+
+/* Dashboard Layout */
+#dashboard-view { flex-direction: row; }
+.sidebar {
+  width: 280px; background: rgba(10, 15, 30, 0.9); border-right: 1px solid var(--border);
+  padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
+}
+.user-profile { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.avatar { width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 5px; background: var(--primary); color: #000; font-weight: bold; }
+
+.nav-links { list-style: none; flex-grow: 1; }
+.nav-links li { padding: 1rem; margin-bottom: 0.5rem; border-radius: 10px; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
+.nav-links li:hover, .nav-links li.active { background: rgba(56,189,248,0.1); color: var(--primary); font-weight: 500; border-left: 3px solid var(--primary); }
+
+.content { flex-grow: 1; padding: 3rem; overflow-y: auto; }
+.section-title { font-size: 2rem; margin-bottom: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+
+/* Tarjetas y Tablas */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--panel-bg); border-radius: 10px; overflow: hidden; }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: rgba(0,0,0,0.5); color: var(--primary); }
+
+/* Escáner */
+#reader { width: 100%; max-width: 400px; border-radius: 15px; overflow: hidden; margin-bottom: 1rem; border: 2px solid var(--primary); }
+
+/* Radar Chart */
+.chart-container { background: var(--panel-bg); padding: 2rem; border-radius: 20px; border: 1px solid var(--border); }
+
+/* Toasts */
+#toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; transition: 0.3s; z-index: 1000; }
+#toast.show { bottom: 30px; }
+.hidden { display: none !important; }
