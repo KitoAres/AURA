@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GACIP - Liderazgo Transformacional</title>
+  
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Librerías -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- PANTALLA DE LOGIN -->
+  <div id="login-view" class="view active">
+    <div class="glass-card login-card">
+      <div class="logo-gacip">🛡️ GACIP</div>
+      <h2>Portal de Entrenamiento</h2>
+      <p>Liderazgo Transformacional</p>
+      
+      <div id="login-error" class="alert hidden">Credenciales incorrectas</div>
+      
+      <form id="login-form">
+        <div class="input-group">
+          <label>ID / Número de Usuario</label>
+          <input type="text" id="login-id" placeholder="Ej. 1001 o sudo" required autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-pass" placeholder="••••••" required>
+        </div>
+        <button type="submit" class="btn-glow">Iniciar Sesión</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL (Oculto al inicio) -->
+  <div id="dashboard-view" class="view hidden">
+    <nav class="sidebar">
+      <div class="logo-gacip small">🛡️ GACIP</div>
+      <div class="user-profile">
+        <div class="avatar" id="nav-avatar">👤</div>
+        <div>
+          <h3 id="nav-name">Nombre</h3>
+          <span id="nav-role" class="badge">Rol</span>
+        </div>
+      </div>
+      <ul class="nav-links" id="nav-links">
+        <!-- Los enlaces se inyectan por JS según el rol -->
+      </ul>
+      <button id="btn-logout" class="btn-outline">Cerrar Sesión</button>
+    </nav>
+
+    <main class="content" id="main-content">
+      <!-- VISTAS DINÁMICAS SE INYECTAN AQUÍ -->
+    </main>
+  </div>
+
+  <div id="toast">Notificación</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
