@@ -8,19 +8,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- 1. PANTALLA DE LOGIN (Única visible al inicio) -->
+  <!-- LOGIN -->
   <div id="login-view" style="display: flex;">
     <div class="glass-card login-card">
       <div class="logo-gacip">🛡️ GACIP</div>
       <h2>Portal de Entrenamiento</h2>
-      
       <div id="login-error" class="alert" style="display: none;">Credenciales incorrectas</div>
-      
       <form id="login-form">
         <div class="input-group">
           <label>ID / Número de Usuario</label>
@@ -35,7 +34,7 @@
     </div>
   </div>
 
-  <!-- 2. DASHBOARD (Oculto totalmente al inicio) -->
+  <!-- DASHBOARD -->
   <div id="dashboard-view" style="display: none;">
     <nav class="sidebar">
       <div class="user-profile">
@@ -51,15 +50,14 @@
     <main class="content" id="main-content"></main>
   </div>
 
-  <!-- 3. MODAL DE EDICIÓN PARA SUDO (Oculto totalmente al inicio) -->
+  <!-- MODAL DE EDICIÓN -->
   <div id="edit-modal" class="modal" style="display: none;">
     <div class="glass-card modal-content">
       <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Editar Perfil</h3>
       <input type="hidden" id="edit-id">
       
-      <!-- SOLO 3 CAMPOS COMO PEDISTE -->
       <div class="input-group">
-        <label>Nombre del Cadete / Usuario</label>
+        <label>Nombre del Voluntario / Admin</label>
         <input type="text" id="edit-name">
       </div>
       <div class="input-group">
@@ -69,8 +67,8 @@
       <div class="input-group">
         <label>Rol de acceso</label>
         <select id="edit-role">
-          <option value="user">Cadete (Usuario)</option>
-          <option value="admin">Instructor (Admin)</option>
+          <option value="user">Voluntario (Usuario)</option>
+          <option value="admin">Admin</option>
         </select>
       </div>
       
@@ -82,7 +80,6 @@
   </div>
 
   <div id="toast">Notificación</div>
-
   <script src="app.js"></script>
 </body>
 </html>
