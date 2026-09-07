@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GACIP - Liderazgo Transformacional</title>
   
-  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   
-  <!-- Librerías -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -23,7 +21,7 @@
       <h2>Portal de Entrenamiento</h2>
       <p>Liderazgo Transformacional</p>
       
-      <div id="login-error" class="alert hidden">Credenciales incorrectas</div>
+      <div id="login-error" class="alert hidden" style="color: #ef4444; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 5px;">Credenciales incorrectas</div>
       
       <form id="login-form">
         <div class="input-group">
@@ -39,7 +37,7 @@
     </div>
   </div>
 
-  <!-- DASHBOARD PRINCIPAL (Oculto al inicio) -->
+  <!-- DASHBOARD PRINCIPAL (Ya sin la clase hidden problemática) -->
   <div id="dashboard-view" class="view">
     <nav class="sidebar">
       <div class="logo-gacip small">🛡️ GACIP</div>
@@ -51,7 +49,7 @@
         </div>
       </div>
       <ul class="nav-links" id="nav-links">
-        <!-- Los enlaces se inyectan por JS según el rol -->
+        <!-- Los enlaces se inyectan por JS -->
       </ul>
       <button id="btn-logout" class="btn-outline">Cerrar Sesión</button>
     </nav>
