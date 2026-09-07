@@ -1,16 +1,12 @@
-// --- 1. CONFIGURACIÓN DE SUPABASE ---
 const SUPABASE_URL = 'https://cmlyjfxuybkglkafhyus.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtbHlqZnh1eWJrZ2xrYWZoeXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NDM2NjUsImV4cCI6MjEwNDMxOTY2NX0.o1z1TMYzJO5VRX5S0dNY2szIrxvntb5m-EyI7QIYOPY';
-
-// Inicializar la conexión
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 let html5QrcodeScanner = null;
 let radarChart = null;
-let editingUserId = null; // Variable para saber a quién estamos editando
+let editingUserId = null; 
 
-// --- 2. SISTEMA DE LOGIN (NUBE) ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('login-id').value.trim();
@@ -19,17 +15,9 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const btn = e.target.querySelector('button');
   
   if (!id || !pass) return;
-
-  btn.textContent = "Conectando..."; // Feedback visual
+  btn.textContent = "Conectando..."; 
   
-  // Buscar usuario en Supabase
-  const { data, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('id', id)
-    .eq('pass', pass)
-    .single();
-
+  const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).eq('pass', pass).single();
   btn.textContent = "Iniciar Sesión";
 
   if (data) {
@@ -52,7 +40,6 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   if(html5QrcodeScanner) html5QrcodeScanner.clear();
 });
 
-// --- 3. MENÚS ---
 function setupDashboard() {
   document.getElementById('nav-name').innerText = currentUser.name;
   document.getElementById('nav-role').innerText = currentUser.role.toUpperCase();
@@ -70,33 +57,25 @@ function setupDashboard() {
       <li onclick="loadView('ranking')">🏆 Ranking</li>`;
     navLinks.innerHTML = menuHTML;
     loadView(currentUser.role === 'sudo' ? 'sudo-users' : 'admin-scan');
-  } 
-  else {
-    navLinks.innerHTML = `
-      <li onclick="loadView('user-profile')">🧠 Mi Perfil</li>
-      <li onclick="loadView('ranking')">🏆 Ranking</li>`;
+  } else {
+    navLinks.innerHTML = `<li onclick="loadView('user-profile')">🧠 Mi Perfil</li><li onclick="loadView('ranking')">🏆 Ranking</li>`;
     loadView('user-profile');
   }
 }
 
-// --- 4. RENDERIZADO DE VISTAS (ASÍNCRONO) ---
 async function loadView(view) {
   const main = document.getElementById('main-content');
   if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
 
-  // Pintar botón activo
   document.querySelectorAll('.nav-links li').forEach(li => {
     li.classList.remove('active');
-    if(li.getAttribute('onclick') && li.getAttribute('onclick').includes(view)) {
-      li.classList.add('active');
-    }
+    if(li.getAttribute('onclick') && li.getAttribute('onclick').includes(view)) li.classList.add('active');
   });
 
   main.innerHTML = `<h2 style="color:var(--primary); text-align:center;">Cargando datos... ⏳</h2>`;
 
   if (view === 'sudo-users') {
     const { data: users } = await supabase.from('usuarios').select('*').neq('role', 'sudo').order('id');
-    
     let trs = users.map(u => `
       <tr>
         <td data-label="ID/Usuario">${u.id}</td>
@@ -116,7 +95,7 @@ async function loadView(view) {
         <h3 style="margin-bottom:1.5rem; color:var(--primary);">Crear Usuario Nuevo</h3>
         <div class="input-group"><label>1. ID (Será su QR)</label><input type="text" id="new-id" placeholder="Ej. 31"></div>
         <div class="input-group"><label>2. Nombre</label><input type="text" id="new-name" placeholder="Nombre completo"></div>
-        <div class="input-group"><label>3. Rol</label><select id="new-role"><option value="user">Cadete (Usuario)</option><option value="admin">Instructor (Admin)</option></select></div>
+        <div class="input-group"><label>3. Rol</label><select id="new-role"><option value="user">Voluntario</option><option value="admin">Admin</option></select></div>
         <button onclick="addUser()" class="btn-glow" style="margin-top:1rem;">Guardar Usuario</button>
       </div>
       <table><tr><th>ID</th><th>Nombre</th><th>Rol</th><th style="text-align:right;">Acciones</th></tr>${trs}</table>`;
@@ -133,7 +112,7 @@ async function loadView(view) {
         </div>
         <div class="glass-card">
           <h3>Punto Manual</h3>
-          <input type="text" id="manual-id" placeholder="ID del Cadete (Ej. 5)" style="margin-bottom:1rem;">
+          <input type="text" id="manual-id" placeholder="ID del Voluntario (Ej. 5)" style="margin-bottom:1rem;">
           <button onclick="addStar()" class="btn-glow">⭐ Dar 1 Estrella</button>
         </div>
       </div>`;
@@ -142,7 +121,6 @@ async function loadView(view) {
   if (view === 'admin-test') {
     const { data: users } = await supabase.from('usuarios').select('id, name').eq('role', 'user').order('id');
     let options = users.map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
-    
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Evaluación MLQ</h2>
       <div class="glass-card">
@@ -165,17 +143,15 @@ async function loadView(view) {
       <h2 style="color:var(--primary); margin-bottom:1rem;">Feedback Conductual</h2>
       <div class="glass-card">
         <select id="feed-user" style="margin-bottom:1.5rem;">${options}</select>
-        <textarea id="feed-text" rows="6" placeholder="Escribe tu observación para el cadete..."></textarea>
+        <textarea id="feed-text" rows="6" placeholder="Escribe tu observación para el voluntario..."></textarea>
         <button onclick="saveFeedback()" class="btn-glow" style="margin-top:1rem;">Enviar Feedback</button>
       </div>`;
   }
 
   if (view === 'user-profile') {
-    // Recargar datos actuales del usuario
     const { data: updatedUser } = await supabase.from('usuarios').select('*').eq('id', currentUser.id).single();
     const { count } = await supabase.from('asistencias').select('*', { count: 'exact', head: true }).eq('usuario_id', currentUser.id);
-    
-    currentUser = updatedUser; // Actualizar sesión local
+    currentUser = updatedUser;
 
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Tu Progreso</h2>
@@ -185,7 +161,7 @@ async function loadView(view) {
           <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias confirmadas: ${count || 0}</p>
           <div class="chart-container"><canvas id="radarChart"></canvas></div>
           <hr style="border-color:var(--border); margin: 1.5rem 0;">
-          <h3 style="color:var(--primary)">Comentarios del Instructor</h3>
+          <h3 style="color:var(--primary)">Comentarios del Admin</h3>
           <p style="font-style:italic; margin-top:1rem;">"${currentUser.feedback || 'Aún no hay feedback.'}"</p>
         </div>
       </div>`;
@@ -197,17 +173,16 @@ async function loadView(view) {
     let trs = users.map((u, i) => `
       <tr>
         <td data-label="Posición" style="font-size:1.5rem; font-weight:bold; color:var(--primary);">#${i+1}</td>
-        <td data-label="Cadete">${u.name}</td>
+        <td data-label="Voluntario">${u.name}</td>
         <td data-label="Estrellas" style="color:var(--gold); font-size:1.2rem; font-weight:bold;">${u.stars} ⭐</td>
       </tr>`).join('');
     main.innerHTML = `<h2 style="color:var(--primary); margin-bottom:1rem;">Ranking Global</h2><table>${trs}</table>`;
   }
 }
 
-// --- 5. LÓGICAS SUDO (BASE DE DATOS Y EDICIÓN) ---
 async function addUser() {
   const id = document.getElementById('new-id').value.trim();
-  const name = document.getElementById('new-name').value.trim() || `Cadete ${id}`;
+  const name = document.getElementById('new-name').value.trim() || `Voluntario ${id}`;
   const role = document.getElementById('new-role').value;
   if(!id) return showToast("❌ ID vacío");
 
@@ -224,7 +199,6 @@ async function deleteUser(id) {
   }
 }
 
-// Funciones para Editar Usuario
 function openEditModal(id, name, pass, role) {
   editingUserId = id;
   document.getElementById('edit-id').value = id;
@@ -245,21 +219,11 @@ async function saveUserEdit() {
   const pass = document.getElementById('edit-pass').value.trim();
   const role = document.getElementById('edit-role').value;
 
-  const { error } = await supabase
-    .from('usuarios')
-    .update({ name, pass, role })
-    .eq('id', editingUserId);
-
-  if (error) {
-    showToast("❌ Error al actualizar");
-  } else {
-    showToast("✅ Usuario modificado");
-    closeEditModal();
-    loadView('sudo-users');
-  }
+  const { error } = await supabase.from('usuarios').update({ name, pass, role }).eq('id', editingUserId);
+  if (error) showToast("❌ Error al actualizar");
+  else { showToast("✅ Usuario modificado"); closeEditModal(); loadView('sudo-users'); }
 }
 
-// --- 6. LÓGICAS ESCÁNER Y PUNTOS (NUBE) ---
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
@@ -270,15 +234,12 @@ function startScanner() {
   html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
     async (txt) => {
       let id = txt.trim();
-      html5QrcodeScanner.pause(true); // Pausar cámara mientras procesa
-
-      // Intentar registrar la asistencia (La base de datos bloquea duplicados el mismo día)
+      html5QrcodeScanner.pause(true); 
       const { error: asisErr } = await supabase.from('asistencias').insert([{ usuario_id: id }]);
 
       if (asisErr) {
-        showToast(`⚠️ Este cadete ya marcó asistencia hoy.`);
+        showToast(`⚠️ Este voluntario ya marcó asistencia hoy.`);
       } else {
-        // Sumar 1 estrella
         const { data: u } = await supabase.from('usuarios').select('stars, name').eq('id', id).single();
         if(u) {
           await supabase.from('usuarios').update({ stars: u.stars + 1 }).eq('id', id);
@@ -287,7 +248,7 @@ function startScanner() {
           showToast(`❌ ID no existe`);
         }
       }
-      setTimeout(() => html5QrcodeScanner.resume(), 2500); // Reanudar tras 2.5 seg
+      setTimeout(() => html5QrcodeScanner.resume(), 2500); 
     }
   );
 }
@@ -298,12 +259,9 @@ async function addStar() {
   if (u) {
     await supabase.from('usuarios').update({ stars: u.stars + 1 }).eq('id', id);
     showToast(`⭐ Estrella manual a ${u.name}`);
-  } else {
-    showToast("❌ Cadete no encontrado");
-  }
+  } else { showToast("❌ Voluntario no encontrado"); }
 }
 
-// --- 7. TESTS Y GRÁFICAS (NUBE) ---
 async function saveTest() {
   let id = document.getElementById('test-user').value;
   let updateData = {
@@ -314,7 +272,7 @@ async function saveTest() {
     test_ci:  Number(document.getElementById('t-ci').value) || 0
   };
   await supabase.from('usuarios').update(updateData).eq('id', id);
-  showToast("✅ Test Guardado en la nube");
+  showToast("✅ Test Guardado");
 }
 
 async function saveFeedback() {
