@@ -25,26 +25,31 @@ let radarChart = null;
 function saveDB() { localStorage.setItem('gacip_db_v2', JSON.stringify(db)); }
 
 // --- 2. SISTEMA DE LOGIN ---
-// --- 2. SISTEMA DE LOGIN ---
 document.getElementById('login-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const id = document.getElementById('login-id').value.trim();
   const pass = document.getElementById('login-pass').value;
   const err = document.getElementById('login-error');
   
-  // Si los campos están vacíos por un bug del navegador, cortar la ejecución aquí
-  if (!id || !pass) return; 
+  if (!id || !pass) return;
 
   if (db[id] && db[id].pass === pass) {
     currentUser = db[id];
     document.getElementById('login-view').classList.remove('active');
     document.getElementById('dashboard-view').classList.add('active');
-    err.style.display = 'none'; // Asegurar que el error se oculte
+    err.style.display = 'none';
     setupDashboard();
   } else {
-    err.style.display = 'block'; // Mostrar el error directamente
-    setTimeout(() => err.style.display = 'none', 3000); // Ocultarlo a los 3 segundos
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 3000);
   }
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  currentUser = null;
+  document.getElementById('dashboard-view').classList.remove('active');
+  document.getElementById('login-view').classList.add('active');
+  if(html5QrcodeScanner) html5QrcodeScanner.clear();
 });
 
 // --- 3. MENÚS SEGÚN ROL ---
@@ -53,17 +58,25 @@ function setupDashboard() {
   document.getElementById('nav-role').innerText = currentUser.role.toUpperCase();
   const navLinks = document.getElementById('nav-links');
   
+  // SUDO AHORA TIENE TODOS LOS PODERES
   if (currentUser.role === 'sudo') {
-    navLinks.innerHTML = `<li class="active" onclick="loadView('sudo-users')">👥 Gestionar Usuarios</li>`;
+    navLinks.innerHTML = `
+      <li onclick="loadView('sudo-users')">👥 Usuarios</li>
+      <li onclick="loadView('admin-scan')">📷 Escanear QR</li>
+      <li onclick="loadView('admin-test')">📊 Evaluar Test</li>
+      <li onclick="loadView('admin-feedback')">📝 Feedback</li>
+      <li onclick="loadView('ranking')">🏆 Ranking</li>`;
     loadView('sudo-users');
-  } else if (currentUser.role === 'admin') {
+  } 
+  else if (currentUser.role === 'admin') {
     navLinks.innerHTML = `
       <li onclick="loadView('admin-scan')">📷 Escanear QR</li>
       <li onclick="loadView('admin-test')">📊 Evaluar Test</li>
       <li onclick="loadView('admin-feedback')">📝 Feedback</li>
       <li onclick="loadView('ranking')">🏆 Ranking</li>`;
     loadView('admin-scan');
-  } else if (currentUser.role === 'user') {
+  } 
+  else if (currentUser.role === 'user') {
     navLinks.innerHTML = `
       <li onclick="loadView('user-profile')">🧠 Mi Perfil</li>
       <li onclick="loadView('ranking')">🏆 Ranking</li>`;
@@ -76,9 +89,13 @@ function loadView(view) {
   const main = document.getElementById('main-content');
   if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
 
-  // Resaltar menú activo
-  document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
-  event && event.currentTarget && event.currentTarget.classList.add('active');
+  // CORRECCIÓN PARA CELULARES: Resaltar pestaña activa sin usar eventos incompatibles
+  document.querySelectorAll('.nav-links li').forEach(li => {
+    li.classList.remove('active');
+    if(li.getAttribute('onclick') && li.getAttribute('onclick').includes(view)) {
+      li.classList.add('active');
+    }
+  });
 
   if (view === 'sudo-users') {
     let trs = Object.values(db).filter(u => u.role !== 'sudo').map(u => `
@@ -94,24 +111,44 @@ function loadView(view) {
         </td>
       </tr>`).join('');
     
+    // FORMULARIO LIMPIO, ORDENADO Y NUMERADO PARA NO CONFUNDIRSE
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Control (SUDO)</h2>
-      <div class="glass-card" style="margin-bottom:1rem;">
-        <h3>Añadir Nuevo</h3><br>
-        <div class="grid-2">
-          <input type="text" id="new-id" placeholder="ID Nuevo (Ej. 31)">
-          <select id="new-role"><option value="user">Cadete (Usuario)</option><option value="admin">Instructor (Admin)</option></select>
-          <input type="text" id="new-name" placeholder="Nombre (Opcional)">
-          <button onclick="addUser()" class="btn-glow">Crear Usuario</button>
+      
+      <div class="glass-card" style="margin-bottom:2rem;">
+        <h3 style="margin-bottom:1.5rem; color:var(--primary);">Añadir Nuevo Usuario</h3>
+        
+        <div class="input-group">
+          <label>1. ID o Número (Se usará para iniciar sesión y el QR)</label>
+          <input type="text" id="new-id" placeholder="Ej. 31 o profe_juan">
         </div>
+        <div class="input-group">
+          <label>2. Nombre Completo</label>
+          <input type="text" id="new-name" placeholder="Ej. Juan Pérez">
+        </div>
+        <div class="input-group">
+          <label>3. Contraseña</label>
+          <input type="text" id="new-pass" value="123">
+        </div>
+        <div class="input-group">
+          <label>4. Rol en el sistema</label>
+          <select id="new-role">
+            <option value="user">Cadete (Usuario)</option>
+            <option value="admin">Instructor (Admin)</option>
+          </select>
+        </div>
+        
+        <button onclick="addUser()" class="btn-glow" style="margin-top:1rem;">Crear Usuario</button>
       </div>
+
+      <h3 style="margin-bottom:1rem;">Lista de Usuarios Registrados</h3>
       <table><tr><th>ID</th><th>Nombre</th><th>Rol</th><th style="text-align:right;">Acciones</th></tr>${trs}</table>`;
   }
 
   if (view === 'admin-scan') {
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Asistencia y Estrellas</h2>
-      <div class="grid-2">
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div class="glass-card">
           <h3 style="margin-bottom:1rem; text-align:center;">Escanear QR</h3>
           <div id="reader"></div>
@@ -119,8 +156,8 @@ function loadView(view) {
         </div>
         <div class="glass-card">
           <h3>Asignar Estrella Manual</h3>
-          <p style="font-size:0.8rem; margin-bottom:1rem; color:var(--text-muted)">Por participación en clase.</p>
-          <input type="text" id="manual-id" placeholder="ID del Cadete (Ej. 1, 15)"><br><br>
+          <p style="font-size:0.8rem; margin-bottom:1rem; color:var(--text-muted)">Escribe el ID (Ej. 1, 15) para dar puntos por participación.</p>
+          <input type="text" id="manual-id" placeholder="ID del Cadete (Ej. 1)"><br><br>
           <button onclick="addStar()" class="btn-glow">⭐ Dar 1 Estrella</button>
         </div>
       </div>`;
@@ -131,15 +168,17 @@ function loadView(view) {
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Test Liderazgo (MLQ)</h2>
       <div class="glass-card">
-        <select id="test-user" style="margin-bottom:1rem;">${options}</select>
-        <div class="grid-2">
+        <label style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.5rem; display:block;">Seleccionar Cadete:</label>
+        <select id="test-user" style="margin-bottom:1.5rem;">${options}</select>
+        
+        <div style="display:flex; flex-direction:column; gap:1rem;">
           <div class="input-group"><label>1. Inf. Idealizada (Atributos) [0-10]</label><input type="number" id="t-iia" max="10"></div>
           <div class="input-group"><label>2. Inf. Idealizada (Conductas) [0-10]</label><input type="number" id="t-iic" max="10"></div>
           <div class="input-group"><label>3. Motivación Inspiracional [0-10]</label><input type="number" id="t-mi" max="10"></div>
           <div class="input-group"><label>4. Estimulación Intelectual [0-10]</label><input type="number" id="t-ei" max="10"></div>
           <div class="input-group"><label>5. Consideración Individual [0-10]</label><input type="number" id="t-ci" max="10"></div>
         </div>
-        <button onclick="saveTest()" class="btn-glow">Guardar Resultados</button>
+        <button onclick="saveTest()" class="btn-glow" style="margin-top:1rem;">Guardar Resultados</button>
       </div>`;
   }
 
@@ -148,8 +187,9 @@ function loadView(view) {
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Feedback Conductual</h2>
       <div class="glass-card">
-        <select id="feed-user" style="margin-bottom:1rem;">${options}</select>
-        <textarea id="feed-text" rows="5" placeholder="Áreas de mejora para el cadete..."></textarea><br><br>
+        <label style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.5rem; display:block;">Seleccionar Cadete:</label>
+        <select id="feed-user" style="margin-bottom:1.5rem;">${options}</select>
+        <textarea id="feed-text" rows="5" placeholder="Escribe aquí las áreas de mejora, progreso..."></textarea><br><br>
         <button onclick="saveFeedback()" class="btn-glow">Guardar Feedback</button>
       </div>`;
   }
@@ -157,15 +197,15 @@ function loadView(view) {
   if (view === 'user-profile') {
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Análisis de Perfil</h2>
-      <div class="grid-2">
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div class="chart-container"><canvas id="radarChart"></canvas></div>
         <div class="glass-card" style="text-align:center;">
           <h3 style="color:var(--text-muted)">Estrellas Acumuladas</h3>
           <h1 style="font-size:4rem; color:var(--gold); margin:1rem 0;">${currentUser.stars} ⭐</h1>
-          <p>Asistencias: ${currentUser.asistencia.length}</p>
+          <p>Asistencias confirmadas: ${currentUser.asistencia.length}</p>
           <hr style="border-color:var(--border); margin: 1.5rem 0;">
-          <h3 style="color:var(--primary)">Feedback del Instructor</h3>
-          <p style="font-style:italic; margin-top:1rem; font-size:0.9rem;">"${currentUser.feedback}"</p>
+          <h3 style="color:var(--primary)">Comentarios de los Instructores</h3>
+          <p style="font-style:italic; margin-top:1rem; font-size:0.95rem;">"${currentUser.feedback}"</p>
         </div>
       </div>`;
     renderChart(currentUser.test);
@@ -214,7 +254,9 @@ function addUser() {
   if(!id || db[id]) { showToast("ID inválido o ya existe."); return; }
   const role = document.getElementById('new-role').value;
   const name = document.getElementById('new-name').value || `Cadete ${id}`;
-  db[id] = { id, pass: "123", role, name, stars: 0, asistencia: [], test: {iia:0, iic:0, mi:0, ei:0, ci:0}, feedback: "" };
+  const pass = document.getElementById('new-pass').value || `123`;
+  
+  db[id] = { id, pass, role, name, stars: 0, asistencia: [], test: {iia:0, iic:0, mi:0, ei:0, ci:0}, feedback: "" };
   saveDB(); showToast("Usuario añadido ✅"); loadView('sudo-users');
 }
 
