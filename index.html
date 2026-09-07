@@ -2,11 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>GACIP - Liderazgo Transformacional</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-  
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -14,49 +13,70 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE LOGIN -->
+  <!-- LOGIN -->
   <div id="login-view" class="view active">
     <div class="glass-card login-card">
       <div class="logo-gacip">🛡️ GACIP</div>
       <h2>Portal de Entrenamiento</h2>
-      <p>Liderazgo Transformacional</p>
       
-      <div id="login-error" class="alert hidden" style="color: #ef4444; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 5px;">Credenciales incorrectas</div>
+      <div id="login-error" class="alert hidden">Credenciales incorrectas</div>
       
       <form id="login-form">
         <div class="input-group">
           <label>ID / Número de Usuario</label>
-          <input type="text" id="login-id" placeholder="Ej. 1001 o sudo" required autocomplete="off">
+          <input type="text" id="login-id" placeholder="Ej. 1, 2, admin1 o sudo" required autocomplete="off">
         </div>
         <div class="input-group">
           <label>Contraseña</label>
-          <input type="password" id="login-pass" placeholder="••••••" required>
+          <input type="password" id="login-pass" placeholder="Por defecto: 123" required>
         </div>
         <button type="submit" class="btn-glow">Iniciar Sesión</button>
       </form>
     </div>
   </div>
 
-  <!-- DASHBOARD PRINCIPAL (Ya sin la clase hidden problemática) -->
+  <!-- DASHBOARD -->
   <div id="dashboard-view" class="view">
     <nav class="sidebar">
-      <div class="logo-gacip small">🛡️ GACIP</div>
       <div class="user-profile">
         <div class="avatar" id="nav-avatar">👤</div>
-        <div>
+        <div class="user-info-text">
           <h3 id="nav-name">Nombre</h3>
           <span id="nav-role" class="badge">Rol</span>
         </div>
       </div>
-      <ul class="nav-links" id="nav-links">
-        <!-- Los enlaces se inyectan por JS -->
-      </ul>
-      <button id="btn-logout" class="btn-outline">Cerrar Sesión</button>
+      <ul class="nav-links" id="nav-links"></ul>
+      <button id="btn-logout" class="btn-outline" style="margin-top: 1rem;">Cerrar Sesión</button>
     </nav>
 
-    <main class="content" id="main-content">
-      <!-- VISTAS DINÁMICAS SE INYECTAN AQUÍ -->
-    </main>
+    <main class="content" id="main-content"></main>
+  </div>
+
+  <!-- MODAL DE EDICIÓN (SOLO SUDO) -->
+  <div id="edit-modal" class="modal hidden">
+    <div class="glass-card modal-content">
+      <h3 style="margin-bottom: 1rem; color: var(--primary);">Editar Usuario</h3>
+      <input type="hidden" id="edit-id">
+      <div class="input-group">
+        <label>Nombre</label>
+        <input type="text" id="edit-name">
+      </div>
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input type="text" id="edit-pass">
+      </div>
+      <div class="input-group">
+        <label>Rol</label>
+        <select id="edit-role">
+          <option value="user">Cadete (Usuario)</option>
+          <option value="admin">Instructor (Admin)</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <button onclick="closeEditModal()" class="btn-outline">Cancelar</button>
+        <button onclick="saveUserEdit()" class="btn-glow">Guardar</button>
+      </div>
+    </div>
   </div>
 
   <div id="toast">Notificación</div>
