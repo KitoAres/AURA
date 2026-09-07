@@ -13,8 +13,8 @@
 </head>
 <body>
 
-  <!-- LOGIN -->
-  <div id="login-view" class="view active">
+  <!-- 1. PANTALLA DE LOGIN (Única visible al inicio) -->
+  <div id="login-view" style="display: flex;">
     <div class="glass-card login-card">
       <div class="logo-gacip">🛡️ GACIP</div>
       <h2>Portal de Entrenamiento</h2>
@@ -24,19 +24,19 @@
       <form id="login-form">
         <div class="input-group">
           <label>ID / Número de Usuario</label>
-          <input type="text" id="login-id" placeholder="Ej. 1, 2, admin1 o sudo" required autocomplete="off">
+          <input type="text" id="login-id" placeholder="Ej. 1, 2, admin1 o sudo" autocomplete="off">
         </div>
         <div class="input-group">
           <label>Contraseña</label>
-          <input type="password" id="login-pass" placeholder="Por defecto: 123" required>
+          <input type="password" id="login-pass" placeholder="Por defecto: 123">
         </div>
         <button type="submit" class="btn-glow">Iniciar Sesión</button>
       </form>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard-view" class="view">
+  <!-- 2. DASHBOARD (Oculto totalmente al inicio) -->
+  <div id="dashboard-view" style="display: none;">
     <nav class="sidebar">
       <div class="user-profile">
         <div class="avatar" id="nav-avatar">👤</div>
@@ -48,17 +48,18 @@
       <ul class="nav-links" id="nav-links"></ul>
       <button id="btn-logout" class="btn-outline" style="margin-top: 1rem;">Cerrar Sesión</button>
     </nav>
-
     <main class="content" id="main-content"></main>
   </div>
 
-  <!-- MODAL DE EDICIÓN (SOLO SUDO) -->
-  <div id="edit-modal" class="modal hidden">
+  <!-- 3. MODAL DE EDICIÓN PARA SUDO (Oculto totalmente al inicio) -->
+  <div id="edit-modal" class="modal" style="display: none;">
     <div class="glass-card modal-content">
-      <h3 style="margin-bottom: 1rem; color: var(--primary);">Editar Usuario</h3>
+      <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Editar Perfil</h3>
       <input type="hidden" id="edit-id">
+      
+      <!-- SOLO 3 CAMPOS COMO PEDISTE -->
       <div class="input-group">
-        <label>Nombre</label>
+        <label>Nombre del Cadete / Usuario</label>
         <input type="text" id="edit-name">
       </div>
       <div class="input-group">
@@ -66,13 +67,14 @@
         <input type="text" id="edit-pass">
       </div>
       <div class="input-group">
-        <label>Rol</label>
+        <label>Rol de acceso</label>
         <select id="edit-role">
           <option value="user">Cadete (Usuario)</option>
           <option value="admin">Instructor (Admin)</option>
         </select>
       </div>
-      <div class="grid-2">
+      
+      <div class="grid-2" style="margin-top: 2rem;">
         <button onclick="closeEditModal()" class="btn-outline">Cancelar</button>
         <button onclick="saveUserEdit()" class="btn-glow">Guardar</button>
       </div>
