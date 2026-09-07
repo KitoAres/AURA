@@ -14,187 +14,81 @@
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-dark);
-  background-image: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 40%),
-                    radial-gradient(circle at bottom left, rgba(251, 191, 36, 0.05), transparent 40%);
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Prohíbe el scroll horizontal */
 }
 
-h1, h2, h3, .logo-gacip {
-  font-family: 'Rajdhani', sans-serif;
-}
+h1, h2, h3, .logo-gacip { font-family: 'Rajdhani', sans-serif; }
 
-/* Vistas */
 .view { display: none; }
 .view.active { display: flex; width: 100%; min-height: 100vh; }
 
 /* Login */
-#login-view { justify-content: center; align-items: center; padding: 1.5rem; }
-.glass-card {
-  background: var(--panel-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.5rem;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-  width: 100%;
-}
+#login-view { justify-content: center; align-items: center; padding: 1rem; }
+.glass-card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 15px; padding: 1.5rem; width: 100%; }
 .login-card { max-width: 400px; text-align: center; }
-.logo-gacip { font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+.logo-gacip { font-size: 2.2rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
 
-/* Inputs y Botones */
-.input-group { text-align: left; margin-bottom: 1.2rem; }
-.input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-input, select, textarea {
-  width: 100%; padding: 0.9rem; border-radius: 10px; border: 1px solid var(--border);
-  background: rgba(0,0,0,0.3); color: white; font-family: inherit; outline: none;
-}
-input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(56,189,248,0.2); }
+/* Formularios y Botones */
+.input-group { text-align: left; margin-bottom: 1rem; }
+.input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+input, select, textarea { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: white; outline: none; }
+.btn-glow { width: 100%; padding: 0.9rem; border: none; border-radius: 8px; background: linear-gradient(90deg, #0284c7, #38bdf8); color: white; font-weight: bold; cursor: pointer; }
+.btn-outline { width: 100%; padding: 0.7rem; border: 1px solid var(--danger); background: transparent; color: var(--danger); border-radius: 8px; cursor: pointer; }
 
-.btn-glow {
-  width: 100%; padding: 1rem; border: none; border-radius: 10px;
-  background: linear-gradient(90deg, #0284c7, #38bdf8); color: white;
-  font-weight: 600; font-size: 1rem; cursor: pointer; text-transform: uppercase;
-  transition: all 0.3s;
-}
-.btn-glow:hover { box-shadow: 0 0 20px rgba(56,189,248,0.4); transform: translateY(-2px); }
-
-.btn-outline {
-  padding: 0.7rem 1.2rem; border: 1px solid var(--danger); background: transparent;
-  color: var(--danger); border-radius: 8px; cursor: pointer; transition: 0.3s; width: 100%;
-  text-align: center;
-}
-.btn-outline:hover { background: rgba(239,68,68,0.1); }
-
-/* Dashboard Layout Base (Escritorio) */
+/* Layout Base (PC) */
 #dashboard-view { flex-direction: row; }
-.sidebar {
-  width: 280px; background: rgba(10, 15, 30, 0.9); border-right: 1px solid var(--border);
-  padding: 2rem; display: flex; flex-direction: column; gap: 2rem;
-  flex-shrink: 0;
-}
-.user-profile { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
-.avatar { width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;}
-.badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 5px; background: var(--primary); color: #000; font-weight: bold; display: inline-block; margin-top: 4px; }
+.sidebar { width: 260px; background: rgba(10, 15, 30, 0.9); padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid var(--border); flex-shrink: 0; }
+.content { flex-grow: 1; padding: 2rem; max-width: calc(100% - 260px); overflow-y: auto; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-.nav-links { list-style: none; flex-grow: 1; }
-.nav-links li { padding: 1rem; margin-bottom: 0.5rem; border-radius: 10px; cursor: pointer; color: var(--text-muted); transition: 0.3s; }
-.nav-links li:hover, .nav-links li.active { background: rgba(56,189,248,0.1); color: var(--primary); font-weight: 500; border-left: 3px solid var(--primary); }
+.user-profile { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.avatar { width: 45px; height: 45px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 5px; background: var(--primary); color: #000; font-weight: bold; }
+.nav-links { list-style: none; flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.nav-links li { padding: 0.8rem; border-radius: 8px; cursor: pointer; background: rgba(255,255,255,0.05); text-align: center; font-size: 0.9rem; }
+.nav-links li.active { background: var(--primary); color: #000; font-weight: bold; }
 
-.content { flex-grow: 1; padding: 3rem; overflow-y: auto; width: 100%; }
-.section-title { font-size: 2rem; margin-bottom: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-
-/* Tarjetas y Tablas */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--panel-bg); border-radius: 10px; overflow: hidden; }
+/* Tablas PC */
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
 th { background: rgba(0,0,0,0.5); color: var(--primary); }
 
-/* Escáner */
-#reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 15px; overflow: hidden; margin-bottom: 1rem; border: 2px solid var(--primary); }
+#reader { width: 100%; border-radius: 10px; border: 2px solid var(--primary); overflow: hidden; }
+.chart-container { background: var(--panel-bg); padding: 1rem; border-radius: 15px; border: 1px solid var(--border); }
 
-/* Radar Chart */
-.chart-container { background: var(--panel-bg); padding: 2rem; border-radius: 20px; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; }
-canvas { max-width: 100% !important; height: auto !important; }
+/* Toasts y Modales */
+#toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 1rem; border-radius: 10px; font-weight: bold; transition: 0.3s; z-index: 1000; text-align: center; width: 90%; max-width: 300px; }
+#toast.show { bottom: 20px; }
+.alert { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 5px; margin-bottom: 1rem; font-size: 0.9rem; }
+.hidden { display: none !important; }
 
-/* Toasts */
-#toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 1rem 2rem; border-radius: 30px; font-weight: bold; transition: 0.3s; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
-#toast.show { bottom: 30px; }
-
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
+.modal-content { max-width: 400px; width: 100%; }
 
 /* ========================================================
-   ADAPTACIÓN PARA CELULARES (DISEÑO RESPONSIVO) 
+   ADAPTACIÓN EXTREMA PARA CELULARES (DISEÑO VERTICAL) 
    ======================================================== */
 @media (max-width: 768px) {
+  #dashboard-view { flex-direction: column; }
+  .sidebar { width: 100%; padding: 1rem; border-right: none; border-bottom: 1px solid var(--border); }
+  .content { max-width: 100%; padding: 1rem; }
+  .grid-2 { grid-template-columns: 1fr; }
   
-  #dashboard-view { 
-    flex-direction: column; /* Apila el menú arriba y el contenido abajo */
-  }
+  /* El menú se vuelve una cuadrícula de 2 columnas */
+  .nav-links { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+  .nav-links li { width: 48%; padding: 0.7rem; font-size: 0.85rem; }
   
-  .sidebar {
-    width: 100%;
-    padding: 1rem;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    gap: 1rem;
-  }
-
-  .user-profile {
-    padding-bottom: 0.5rem;
-    border-bottom: none;
-  }
-
-  /* Menú deslizable horizontalmente para el celular */
-  .nav-links {
-    display: flex;
-    overflow-x: auto; /* Permite arrastrar el menú hacia los lados */
-    gap: 0.5rem;
-    padding-bottom: 0.5rem;
-    white-space: nowrap; /* Evita que el texto se rompa */
-    /* Estilos para ocultar barra de scroll en navegadores */
-    -ms-overflow-style: none;  
-    scrollbar-width: none;  
-  }
-  .nav-links::-webkit-scrollbar { display: none; }
-
-  .nav-links li {
-    margin-bottom: 0;
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-  }
-  
-  /* Cambia el indicador activo de borde izquierdo a borde inferior/fondo */
-  .nav-links li.active, .nav-links li:hover {
-    border-left: none;
-    background: var(--primary);
-    color: #000;
-  }
-
-  /* Contenido y espacios */
-  .content { 
-    padding: 1rem; 
-  }
-  
-  .section-title { 
-    font-size: 1.5rem; 
-    margin-bottom: 1.5rem; 
-  }
-
-  /* Las tarjetas pasan a estar una encima de otra */
-  .grid-2 { 
-    grid-template-columns: 1fr; 
-    gap: 1rem; 
-  }
-
-  .glass-card {
-    padding: 1.5rem;
-  }
-
-  .chart-container {
-    padding: 1rem;
-  }
-
-  /* Tabla desplazable lateralmente para evitar deformaciones */
-  .table-responsive-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap; /* Mantiene la tabla firme */
-  }
-
-  #toast {
-    width: 90%;
-    text-align: center;
-    padding: 0.8rem;
-    font-size: 0.9rem;
+  /* "Table to Cards": La tabla se rompe y se vuelve vertical */
+  table, thead, tbody, th, td, tr { display: block; width: 100%; }
+  thead tr { display: none; } /* Oculta cabecera */
+  tr { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem; background: rgba(0,0,0,0.2); }
+  td { text-align: right; padding: 0.5rem 0.5rem 0.5rem 40%; position: relative; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+  td:last-child { border-bottom: none; }
+  td::before { 
+    content: attr(data-label); 
+    position: absolute; left: 0.5rem; top: 0.5rem; width: 35%; text-align: left; 
+    font-weight: bold; color: var(--primary); font-size: 0.85rem;
   }
 }
