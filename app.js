@@ -25,28 +25,26 @@ let radarChart = null;
 function saveDB() { localStorage.setItem('gacip_db_v2', JSON.stringify(db)); }
 
 // --- 2. SISTEMA DE LOGIN ---
+// --- 2. SISTEMA DE LOGIN ---
 document.getElementById('login-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const id = document.getElementById('login-id').value.trim();
   const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
   
+  // Si los campos están vacíos por un bug del navegador, cortar la ejecución aquí
+  if (!id || !pass) return; 
+
   if (db[id] && db[id].pass === pass) {
     currentUser = db[id];
     document.getElementById('login-view').classList.remove('active');
     document.getElementById('dashboard-view').classList.add('active');
+    err.style.display = 'none'; // Asegurar que el error se oculte
     setupDashboard();
   } else {
-    const err = document.getElementById('login-error');
-    err.classList.remove('hidden');
-    setTimeout(() => err.classList.add('hidden'), 3000);
+    err.style.display = 'block'; // Mostrar el error directamente
+    setTimeout(() => err.style.display = 'none', 3000); // Ocultarlo a los 3 segundos
   }
-});
-
-document.getElementById('btn-logout').addEventListener('click', () => {
-  currentUser = null;
-  document.getElementById('dashboard-view').classList.remove('active');
-  document.getElementById('login-view').classList.add('active');
-  if(html5QrcodeScanner) html5QrcodeScanner.clear();
 });
 
 // --- 3. MENÚS SEGÚN ROL ---
