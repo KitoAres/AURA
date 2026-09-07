@@ -7,6 +7,7 @@ let html5QrcodeScanner = null;
 let radarChart = null;
 let editingUserId = null; 
 
+// --- LOGIN CORREGIDO A PRUEBA DE FALLOS ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('login-id').value.trim();
@@ -17,16 +18,40 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   if (!id || !pass) return;
   btn.textContent = "Conectando..."; 
   
-  const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).eq('pass', pass).single();
-  btn.textContent = "Iniciar Sesión";
+  try {
+    // Usamos .limit(1) en lugar de .single() para evitar que la app se cuelgue si falla
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('id', id)
+      .eq('pass', pass)
+      .limit(1);
 
-  if (data) {
-    currentUser = data;
-    document.getElementById('login-view').style.display = 'none';
-    document.getElementById('dashboard-view').style.display = 'flex';
-    err.style.display = 'none';
-    setupDashboard();
-  } else {
+    btn.textContent = "Iniciar Sesión";
+
+    if (error) {
+      console.error("Error de Supabase:", error);
+      err.innerText = "Error en la base de datos";
+      err.style.display = 'block';
+      setTimeout(() => err.style.display = 'none', 3000);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      currentUser = data[0];
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('dashboard-view').style.display = 'flex';
+      err.style.display = 'none';
+      setupDashboard();
+    } else {
+      err.innerText = "Credenciales incorrectas";
+      err.style.display = 'block';
+      setTimeout(() => err.style.display = 'none', 3000);
+    }
+  } catch (errCatch) {
+    btn.textContent = "Iniciar Sesión";
+    console.error("Fallo crítico:", errCatch);
+    err.innerText = "Error de conexión";
     err.style.display = 'block';
     setTimeout(() => err.style.display = 'none', 3000);
   }
@@ -76,7 +101,7 @@ async function loadView(view) {
 
   if (view === 'sudo-users') {
     const { data: users } = await supabase.from('usuarios').select('*').neq('role', 'sudo').order('id');
-    let trs = users.map(u => `
+    let trs = (users || []).map(u => `
       <tr>
         <td data-label="ID/Usuario">${u.id}</td>
         <td data-label="Nombre">${u.name}</td>
@@ -120,7 +145,7 @@ async function loadView(view) {
 
   if (view === 'admin-test') {
     const { data: users } = await supabase.from('usuarios').select('id, name').eq('role', 'user').order('id');
-    let options = users.map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
+    let options = (users || []).map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Evaluación MLQ</h2>
       <div class="glass-card">
@@ -138,7 +163,7 @@ async function loadView(view) {
 
   if (view === 'admin-feedback') {
     const { data: users } = await supabase.from('usuarios').select('id, name').eq('role', 'user').order('id');
-    let options = users.map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
+    let options = (users || []).map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Feedback Conductual</h2>
       <div class="glass-card">
@@ -151,13 +176,13 @@ async function loadView(view) {
   if (view === 'user-profile') {
     const { data: updatedUser } = await supabase.from('usuarios').select('*').eq('id', currentUser.id).single();
     const { count } = await supabase.from('asistencias').select('*', { count: 'exact', head: true }).eq('usuario_id', currentUser.id);
-    currentUser = updatedUser;
+    if(updatedUser) currentUser = updatedUser;
 
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Tu Progreso</h2>
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div class="glass-card" style="text-align:center;">
-          <h1 style="font-size:4.5rem; color:var(--gold); margin:0;">${currentUser.stars} ⭐</h1>
+          <h1 style="font-size:4.5rem; color:var(--gold); margin:0;">${currentUser.stars || 0} ⭐</h1>
           <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias confirmadas: ${count || 0}</p>
           <div class="chart-container"><canvas id="radarChart"></canvas></div>
           <hr style="border-color:var(--border); margin: 1.5rem 0;">
@@ -170,7 +195,7 @@ async function loadView(view) {
 
   if (view === 'ranking') {
     const { data: users } = await supabase.from('usuarios').select('id, name, stars').eq('role', 'user').order('stars', { ascending: false });
-    let trs = users.map((u, i) => `
+    let trs = (users || []).map((u, i) => `
       <tr>
         <td data-label="Posición" style="font-size:1.5rem; font-weight:bold; color:var(--primary);">#${i+1}</td>
         <td data-label="Voluntario">${u.name}</td>
@@ -289,7 +314,7 @@ function renderChart(t) {
     type: 'radar',
     data: {
       labels: ['Atributos', 'Conductas', 'Motivación', 'Estimulación', 'Consideración'],
-      datasets: [{ label: 'Nivel', data: [t.test_iia, t.test_iic, t.test_mi, t.test_ei, t.test_ci], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', pointBackgroundColor: '#fbbf24', borderWidth: 2 }]
+      datasets: [{ label: 'Nivel', data: [t.test_iia || 0, t.test_iic || 0, t.test_mi || 0, t.test_ei || 0, t.test_ci || 0], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', pointBackgroundColor: '#fbbf24', borderWidth: 2 }]
     },
     options: { scales: { r: { angleLines: {color: 'rgba(255,255,255,0.1)'}, grid: {color: 'rgba(255,255,255,0.1)'}, pointLabels: {color: '#fff', font: {size: 10}}, suggestedMin: 0, suggestedMax: 10 } }, plugins: { legend: { display: false } } }
   });
