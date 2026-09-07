@@ -1,45 +1,41 @@
-// --- 1. GENERADOR DE BASE DE DATOS LOCAL ---
-function generateDefaultDB() {
-  const db = {
-    "sudo": { id: "sudo", pass: "sudo123", role: "sudo", name: "Super Admin" },
-    "admin1": { id: "admin1", pass: "123", role: "admin", name: "Instructor Principal" }
-  };
-  // Genera 30 cadetes (Del 1 al 30)
-  for (let i = 1; i <= 30; i++) {
-    let idStr = i.toString();
-    db[idStr] = { 
-      id: idStr, pass: "123", role: "user", name: "Cadete " + idStr, 
-      stars: 0, asistencia: [], 
-      test: { iia: 0, iic: 0, mi: 0, ei: 0, ci: 0 }, feedback: "Aún no hay feedback." 
-    };
-  }
-  return db;
-}
+// --- 1. CONFIGURACIÓN DE SUPABASE ---
+const SUPABASE_URL = 'https://cmlyjfxuybkglkafhyus.supabase.co';
+const SUPABASE_KEY = 'AQUÍ_PEGA_TU_LLAVE_ANON_PUBLIC'; // <--- ¡PEGA TU LLAVE AQUÍ!
 
-let db = JSON.parse(localStorage.getItem('gacip_db_v3')) || generateDefaultDB();
+// Inicializar la conexión
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = null;
 let html5QrcodeScanner = null;
 let radarChart = null;
 
-function saveDB() { localStorage.setItem('gacip_db_v3', JSON.stringify(db)); }
-
-// --- 2. SISTEMA DE LOGIN DIRECTO ---
-document.getElementById('login-form').addEventListener('submit', (e) => {
+// --- 2. SISTEMA DE LOGIN (NUBE) ---
+document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('login-id').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
   const err = document.getElementById('login-error');
+  const btn = e.target.querySelector('button');
   
   if (!id || !pass) return;
 
-  if (db[id] && db[id].pass === pass) {
-    currentUser = db[id];
-    
-    // TRANSICIÓN SEGURA (Forzando estilos)
+  btn.textContent = "Conectando..."; // Feedback visual
+  
+  // Buscar usuario en Supabase
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('*')
+    .eq('id', id)
+    .eq('pass', pass)
+    .single();
+
+  btn.textContent = "Iniciar Sesión";
+
+  if (data) {
+    currentUser = data;
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'flex';
     err.style.display = 'none';
-    
     setupDashboard();
   } else {
     err.style.display = 'block';
@@ -82,8 +78,8 @@ function setupDashboard() {
   }
 }
 
-// --- 4. RENDERIZADO DE VISTAS ---
-function loadView(view) {
+// --- 4. RENDERIZADO DE VISTAS (ASÍNCRONO) ---
+async function loadView(view) {
   const main = document.getElementById('main-content');
   if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
 
@@ -95,15 +91,18 @@ function loadView(view) {
     }
   });
 
+  main.innerHTML = `<h2 style="color:var(--primary); text-align:center;">Cargando datos... ⏳</h2>`;
+
   if (view === 'sudo-users') {
-    let trs = Object.values(db).filter(u => u.role !== 'sudo').map(u => `
+    const { data: users } = await supabase.from('usuarios').select('*').neq('role', 'sudo').order('id');
+    
+    let trs = users.map(u => `
       <tr>
         <td data-label="ID/Usuario">${u.id}</td>
         <td data-label="Nombre">${u.name}</td>
         <td data-label="Rol">${u.role}</td>
         <td data-label="Acciones">
           <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-            <button onclick="openEditModal('${u.id}')" class="btn-outline" style="border-color:var(--gold); color:var(--gold)">Editar</button>
             <button onclick="deleteUser('${u.id}')" class="btn-outline">Borrar</button>
           </div>
         </td>
@@ -139,7 +138,9 @@ function loadView(view) {
   }
 
   if (view === 'admin-test') {
-    let options = Object.values(db).filter(u => u.role === 'user').map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
+    const { data: users } = await supabase.from('usuarios').select('id, name').eq('role', 'user').order('id');
+    let options = users.map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
+    
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Evaluación MLQ</h2>
       <div class="glass-card">
@@ -156,7 +157,8 @@ function loadView(view) {
   }
 
   if (view === 'admin-feedback') {
-    let options = Object.values(db).filter(u => u.role === 'user').map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
+    const { data: users } = await supabase.from('usuarios').select('id, name').eq('role', 'user').order('id');
+    let options = users.map(u => `<option value="${u.id}">${u.id} - ${u.name}</option>`).join('');
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Feedback Conductual</h2>
       <div class="glass-card">
@@ -167,76 +169,60 @@ function loadView(view) {
   }
 
   if (view === 'user-profile') {
+    // Recargar datos actuales del usuario
+    const { data: updatedUser } = await supabase.from('usuarios').select('*').eq('id', currentUser.id).single();
+    const { count } = await supabase.from('asistencias').select('*', { count: 'exact', head: true }).eq('usuario_id', currentUser.id);
+    
+    currentUser = updatedUser; // Actualizar sesión local
+
     main.innerHTML = `
       <h2 style="color:var(--primary); margin-bottom:1rem;">Tu Progreso</h2>
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div class="glass-card" style="text-align:center;">
           <h1 style="font-size:4.5rem; color:var(--gold); margin:0;">${currentUser.stars} ⭐</h1>
-          <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias: ${currentUser.asistencia.length}</p>
+          <p style="color:var(--text-muted); margin-bottom:1.5rem;">Asistencias confirmadas: ${count}</p>
           <div class="chart-container"><canvas id="radarChart"></canvas></div>
           <hr style="border-color:var(--border); margin: 1.5rem 0;">
           <h3 style="color:var(--primary)">Comentarios del Instructor</h3>
-          <p style="font-style:italic; margin-top:1rem;">"${currentUser.feedback}"</p>
+          <p style="font-style:italic; margin-top:1rem;">"${currentUser.feedback || 'Aún no hay feedback.'}"</p>
         </div>
       </div>`;
-    renderChart(currentUser.test);
+    renderChart(currentUser);
   }
 
   if (view === 'ranking') {
-    let users = Object.values(db).filter(u => u.role === 'user').sort((a,b) => b.stars - a.stars);
+    const { data: users } = await supabase.from('usuarios').select('id, name, stars').eq('role', 'user').order('stars', { ascending: false });
     let trs = users.map((u, i) => `
       <tr>
         <td data-label="Posición" style="font-size:1.5rem; font-weight:bold; color:var(--primary);">#${i+1}</td>
-        <td data-label="Cadete">${u.name} (ID: ${u.id})</td>
+        <td data-label="Cadete">${u.name}</td>
         <td data-label="Estrellas" style="color:var(--gold); font-size:1.2rem; font-weight:bold;">${u.stars} ⭐</td>
       </tr>`).join('');
     main.innerHTML = `<h2 style="color:var(--primary); margin-bottom:1rem;">Ranking Global</h2><table>${trs}</table>`;
   }
 }
 
-// --- 5. LOGICA DEL MODAL DE EDICIÓN ---
-function openEditModal(id) {
-  const u = db[id];
-  document.getElementById('edit-id').value = u.id;
-  document.getElementById('edit-name').value = u.name;
-  document.getElementById('edit-pass').value = u.pass;
-  document.getElementById('edit-role').value = u.role;
-  // Ocultar CSS bugs, encender bloque 100% manual
-  document.getElementById('edit-modal').style.display = 'flex';
+// --- 5. LÓGICAS SUDO (BASE DE DATOS) ---
+async function addUser() {
+  const id = document.getElementById('new-id').value.trim();
+  const name = document.getElementById('new-name').value.trim() || `Cadete ${id}`;
+  const role = document.getElementById('new-role').value;
+  if(!id) return showToast("❌ ID vacío");
+
+  const { error } = await supabase.from('usuarios').insert([{ id, name, pass: '123', role }]);
+  if (error) showToast("❌ Error: El ID ya existe");
+  else { showToast("✅ Usuario creado"); loadView('sudo-users'); }
 }
 
-function closeEditModal() {
-  document.getElementById('edit-modal').style.display = 'none';
-}
-
-function saveUserEdit() {
-  const id = document.getElementById('edit-id').value;
-  db[id].name = document.getElementById('edit-name').value.trim();
-  db[id].pass = document.getElementById('edit-pass').value.trim();
-  db[id].role = document.getElementById('edit-role').value;
-  saveDB(); 
-  closeEditModal(); 
-  loadView('sudo-users'); 
-  showToast("Usuario guardado ✅");
-}
-
-function deleteUser(id) {
-  if(confirm("¿Borrar definitivamente al usuario " + id + "?")) {
-    delete db[id]; saveDB(); loadView('sudo-users'); showToast("Usuario eliminado 🗑️");
+async function deleteUser(id) {
+  if(confirm(`¿Borrar definitivamente al usuario ${id}?`)) {
+    await supabase.from('usuarios').delete().eq('id', id);
+    showToast("🗑️ Usuario eliminado");
+    loadView('sudo-users');
   }
 }
 
-function addUser() {
-  const id = document.getElementById('new-id').value.trim();
-  if(!id || db[id]) { showToast("ID vacío o ya existe ❌"); return; }
-  const role = document.getElementById('new-role').value;
-  const name = document.getElementById('new-name').value.trim() || `Cadete ${id}`;
-  
-  db[id] = { id, pass: "123", role, name, stars: 0, asistencia: [], test: {iia:0, iic:0, mi:0, ei:0, ci:0}, feedback: "" };
-  saveDB(); showToast("Nuevo cadete creado ✅"); loadView('sudo-users');
-}
-
-// --- 6. LOGICA ESCANEO / PUNTOS / TEST ---
+// --- 6. LÓGICAS ESCÁNER Y PUNTOS (NUBE) ---
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000);
@@ -245,43 +231,60 @@ function showToast(msg) {
 function startScanner() {
   html5QrcodeScanner = new Html5Qrcode("reader");
   html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-    (txt) => {
+    async (txt) => {
       let id = txt.trim();
-      if(db[id] && db[id].role === 'user') {
-        const hoy = new Date().toLocaleDateString();
-        if(!db[id].asistencia.includes(hoy)) {
-          db[id].asistencia.push(hoy); db[id].stars += 1; saveDB();
-          showToast(`✅ +1 ⭐ para ${db[id].name}`);
-        } else { showToast(`⚠️ ${db[id].name} ya fue marcado hoy.`); }
-      } else { showToast("❌ QR inválido."); }
-      html5QrcodeScanner.stop();
+      html5QrcodeScanner.pause(true); // Pausar cámara mientras procesa
+
+      // Intentar registrar la asistencia (La base de datos bloquea duplicados el mismo día)
+      const { error: asisErr } = await supabase.from('asistencias').insert([{ usuario_id: id }]);
+
+      if (asisErr) {
+        showToast(`⚠️ Este cadete ya marcó asistencia hoy.`);
+      } else {
+        // Sumar 1 estrella
+        const { data: u } = await supabase.from('usuarios').select('stars, name').eq('id', id).single();
+        if(u) {
+          await supabase.from('usuarios').update({ stars: u.stars + 1 }).eq('id', id);
+          showToast(`✅ +1 ⭐ para ${u.name}`);
+        } else {
+          showToast(`❌ ID no existe`);
+        }
+      }
+      setTimeout(() => html5QrcodeScanner.resume(), 2500); // Reanudar tras 2.5 seg
     }
   );
 }
 
-function addStar() {
+async function addStar() {
   let id = document.getElementById('manual-id').value.trim();
-  if(db[id] && db[id].role === 'user') {
-    db[id].stars += 1; saveDB(); showToast(`⭐ Estrella manual a ${db[id].name}`);
-  } else { showToast("❌ Cadete no encontrado."); }
+  const { data: u } = await supabase.from('usuarios').select('stars, name').eq('id', id).single();
+  if (u) {
+    await supabase.from('usuarios').update({ stars: u.stars + 1 }).eq('id', id);
+    showToast(`⭐ Estrella manual a ${u.name}`);
+  } else {
+    showToast("❌ Cadete no encontrado");
+  }
 }
 
-function saveTest() {
+// --- 7. TESTS Y GRÁFICAS (NUBE) ---
+async function saveTest() {
   let id = document.getElementById('test-user').value;
-  db[id].test = {
-    iia: Number(document.getElementById('t-iia').value) || 0,
-    iic: Number(document.getElementById('t-iic').value) || 0,
-    mi:  Number(document.getElementById('t-mi').value) || 0,
-    ei:  Number(document.getElementById('t-ei').value) || 0,
-    ci:  Number(document.getElementById('t-ci').value) || 0
+  let updateData = {
+    test_iia: Number(document.getElementById('t-iia').value) || 0,
+    test_iic: Number(document.getElementById('t-iic').value) || 0,
+    test_mi:  Number(document.getElementById('t-mi').value) || 0,
+    test_ei:  Number(document.getElementById('t-ei').value) || 0,
+    test_ci:  Number(document.getElementById('t-ci').value) || 0
   };
-  saveDB(); showToast("Test Guardado ✅");
+  await supabase.from('usuarios').update(updateData).eq('id', id);
+  showToast("✅ Test Guardado en la nube");
 }
 
-function saveFeedback() {
+async function saveFeedback() {
   let id = document.getElementById('feed-user').value;
-  db[id].feedback = document.getElementById('feed-text').value;
-  saveDB(); showToast("Feedback Guardado ✅");
+  let feedback = document.getElementById('feed-text').value;
+  await supabase.from('usuarios').update({ feedback }).eq('id', id);
+  showToast("✅ Feedback Guardado");
 }
 
 function renderChart(t) {
@@ -291,7 +294,7 @@ function renderChart(t) {
     type: 'radar',
     data: {
       labels: ['Atributos', 'Conductas', 'Motivación', 'Estimulación', 'Consideración'],
-      datasets: [{ label: 'Nivel', data: [t.iia, t.iic, t.mi, t.ei, t.ci], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', pointBackgroundColor: '#fbbf24', borderWidth: 2 }]
+      datasets: [{ label: 'Nivel', data: [t.test_iia, t.test_iic, t.test_mi, t.test_ei, t.test_ci], backgroundColor: 'rgba(56,189,248,0.4)', borderColor: '#38bdf8', pointBackgroundColor: '#fbbf24', borderWidth: 2 }]
     },
     options: { scales: { r: { angleLines: {color: 'rgba(255,255,255,0.1)'}, grid: {color: 'rgba(255,255,255,0.1)'}, pointLabels: {color: '#fff', font: {size: 10}}, suggestedMin: 0, suggestedMax: 10 } }, plugins: { legend: { display: false } } }
   });
