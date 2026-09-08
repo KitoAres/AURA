@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACIP | Panel Sudo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">GACIP Sudo</div>
+        <div class="links">
+            <a href="dashboard.html">Escáner QR</a>
+            <a href="profile.html">Perfiles</a>
+            <a href="sudo.html" style="color: var(--danger); font-weight: bold;">Panel Sudo</a>
+            <button id="logoutBtn" class="btn outline" onclick="localStorage.clear(); window.location.href='index.html'">Salir</button>
+        </div>
+    </nav>
+    <main class="dashboard-container" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+        
+        <!-- Formulario para crear usuarios -->
+        <div class="card" style="max-width: 100%; text-align: left;">
+            <h2 style="margin-bottom: 1.5rem; color: var(--danger);">Crear Nuevo Acceso</h2>
+            <form id="createUserForm">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="new-fullname" required>
+                </div>
+                <div class="input-group">
+                    <label>Usuario (Para el Login)</label>
+                    <input type="text" id="new-username" required>
+                </div>
+                <div class="input-group">
+                    <label>Rol</label>
+                    <select id="new-role" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                        <option value="3">Voluntario (Usuario)</option>
+                        <option value="2">Administrador</option>
+                        <option value="1">Sudo (Control Total)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Código del QR (Ej: QR-USER3)</label>
+                    <input type="text" id="new-qr" required>
+                </div>
+                <button type="submit" class="btn primary" style="background: var(--danger);">Registrar Usuario</button>
+            </form>
+            <div id="sudo-msg" class="alert hidden" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Lista de usuarios -->
+        <div class="card" style="max-width: 100%; text-align: left;">
+            <h2 style="margin-bottom: 1.5rem;">Usuarios Registrados</h2>
+            <div id="users-list" style="display: grid; gap: 1rem;">
+                Cargando usuarios...
+            </div>
+        </div>
+
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script src="js/sudo.js"></script>
+</body>
+</html>
+
