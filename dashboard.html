@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACIP | Dashboard Escáner</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">GACIP Admin</div>
+        <div class="links">
+            <a href="dashboard.html">Escáner QR</a>
+            <a href="profile.html">Perfiles de Liderazgo</a>
+            <button id="logoutBtn" class="btn outline">Salir</button>
+        </div>
+    </nav>
+    <main class="dashboard-container">
+        <div class="scanner-section">
+            <h2>Registro de Asistencia</h2>
+            <div id="reader"></div>
+            <div id="scan-result" class="alert hidden"></div>
+        </div>
+    </main>
+    
+    <!-- Supabase & HTML5 QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="js/app.js"></script>
+    <script src="js/qr-scanner.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+/* =========================================
+   GACIP UI System - Modern & Clean
+========================================= */
+:root {
+    --primary: #1d4ed8; /* Blue GACIP */
+    --primary-hover: #1e40af;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); }
+
+/* Layouts */
+.auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.dashboard-container { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+/* Cards */
+.card { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+.card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.card p { color: var(--text-muted); margin-bottom: 2rem; }
+
+/* Forms & Inputs */
+.input-group { margin-bottom: 1.5rem; text-align: left; }
+.input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+.input-group input { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; transition: border 0.3s; }
+.input-group input:focus { border-color: var(--primary); outline: none; }
+
+/* Buttons */
+.btn { width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.btn.primary { background: var(--primary); color: white; }
+.btn.primary:hover { background: var(--primary-hover); }
+
+/* Navbar */
+.navbar { background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.navbar .brand { font-weight: 700; font-size: 1.2rem; color: var(--primary); }
+.navbar .links a { text-decoration: none; color: var(--text-main); margin-right: 1.5rem; font-weight: 500; }
+
+/* Scanner */
+.scanner-section { max-width: 600px; margin: 0 auto; text-align: center; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+#reader { width: 100%; margin-top: 1.5rem; }
+.alert { padding: 1rem; border-radius: 6px; margin-top: 1rem; font-weight: bold; }
+.alert.success { background: #d1fae5; color: #065f46; }
+.alert.error { background: #fee2e2; color: #991b1b; }
+.hidden { display: none; }
