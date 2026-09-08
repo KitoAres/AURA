@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACIP | Perfiles de Liderazgo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">GACIP Admin</div>
+        <div class="links">
+            <a href="dashboard.html">Escáner QR</a>
+            <a href="profile.html">Perfiles de Liderazgo</a>
+            <button id="logoutBtn" class="btn outline">Salir</button>
+        </div>
+    </nav>
+    <main class="dashboard-container">
+        <h2>Perfiles Psicológicos y de Liderazgo</h2>
+        <!-- Aquí se inyectarán los perfiles con JavaScript -->
+        <div id="profiles-container" style="margin-top: 2rem; display: grid; gap: 1.5rem;">
+            <p>Cargando perfiles...</p>
+        </div>
+    </main>
+    
+    <!-- Supabase y lógica propia -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
