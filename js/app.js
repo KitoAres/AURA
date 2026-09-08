@@ -6,7 +6,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Función para registrar asistencia
+// ==========================================
+// FUNCIÓN DE REGISTRO DE ASISTENCIA (QR)
+// ==========================================
 async function registerAttendance(qrCode) {
     try {
         // 1. Buscar usuario por su QR
@@ -45,4 +47,41 @@ async function registerAttendance(qrCode) {
         console.error(error);
         return { success: false, message: error.message };
     }
+}
+
+// ==========================================
+// LÓGICA DE LOGIN DIRECTO POR USUARIO
+// ==========================================
+const loginForm = document.getElementById('loginForm');
+
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página recargue al darle al botón
+        
+        // Obtenemos el nombre de usuario escrito
+        const usernameInput = document.getElementById('username').value.trim();
+        
+        try {
+            // Buscamos al usuario en la base de datos de Supabase usando el campo "username"
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('username', usernameInput)
+                .single();
+
+            if (error || !user) {
+                alert('Usuario no encontrado. Intenta con Sudo, Admin 1 o User 1');
+                return;
+            }
+
+            // Si se encuentra, guardamos sus datos localmente para uso futuro
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Enviamos al usuario al Dashboard
+            window.location.href = 'dashboard.html';
+
+        } catch (err) {
+            console.error('Error en el login:', err);
+        }
+    });
 }
